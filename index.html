@@ -7,7 +7,7 @@
     <title>To bot or not</title>
 
     <link rel="stylesheet" href="css/reveal.css">
-    <link rel="stylesheet" href="css/theme/solarized.css">
+    <link rel="stylesheet" href="css/theme/moon.css">
 
     <!-- Theme used for syntax highlighting of code -->
     <link rel="stylesheet" href="lib/css/zenburn.css">
@@ -25,18 +25,45 @@
 <div class="reveal">
     <div class="slides">
         <section>
-            <section>
-                <h1><img src="img/hubot.png"/></h1>
-                <h2>to bot or not</h2>
-            </section>
-            <section>
-                <img src="img/demo.png"/>
-                <aside class="notes">
-                    <ul>
-                        <li>TODO</li>
-                    </ul>
-                </aside>
-            </section>
+            <img src="img/samantha.jpg" height="400"/>
+            <h2>to bot or not</h2>
+        </section>
+        <section>
+            <h1>
+                <video controls>
+                    <source src="vid/samantha.mp4" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </h1>
+        </section>
+        <section>
+            <h1>Hubot</h1>
+            <h2><img src="img/hubot.png"/></h2>
+        </section>
+        <section>
+            <img src="img/demo.png"/>
+            <aside class="notes">
+                <ul>
+                    <li>samantha please sing me a song</li>
+                    <li>samantha o my god, stop singing</li>
+                    <li>samantha generate some degradation for flux</li>
+                </ul>
+            </aside>
+        </section>
+        <section>
+            <h1>Sample code</h1>
+            <pre><code class="hljs" data-trim contenteditable>
+module.exports = (robot) ->
+  robot.hear /generate some degradation/i, (msg) ->
+    data = JSON.stringify({
+        variables:
+          ...
+      })
+    msg.http("http://flux.cd.cpp-dev-qap.amiefarm.com/api/engine/process-instances/degradation_solving_process")
+       .headers({ "Content-Type": "application/json", "Accept": "application/hal+json" })
+       .post(data) (err, res, body) ->
+          msg.send 'There you go, you should see some degradation at http://flux.cd.cpp-dev-qap.amiefarm.com'
+            </code></pre>
         </section>
     </div>
 </div>
