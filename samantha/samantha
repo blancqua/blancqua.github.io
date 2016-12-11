@@ -1,1 +1,3 @@
+#!/bin/bash
+cd "$(dirname "$0")"
 HUBOT_SLACK_TOKEN=REPLACE_ME ./bin/hubot --adapter slack
