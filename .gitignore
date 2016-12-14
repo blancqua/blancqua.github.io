@@ -8,8 +8,6 @@ out/
 log/*.log
 tmp/**
 node_modules/
-!samantha/node_modules/
-samantha/samantha
 .sass-cache
 css/reveal.min.css
 js/reveal.min.js
