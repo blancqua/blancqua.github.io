@@ -1,0 +1,416 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <title>Docker Swarm</title>
+
+    <link rel="stylesheet" href="css/reveal.css">
+    <link rel="stylesheet" href="css/theme/moon.css">
+
+    <!-- Theme used for syntax highlighting of code -->
+    <link rel="stylesheet" href="lib/css/zenburn.css">
+
+    <!-- Printing and PDF exports -->
+    <script>
+        var link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = window.location.search.match(/print-pdf/gi) ? 'css/print/pdf.css' : 'css/print/paper.css';
+        document.getElementsByTagName('head')[0].appendChild(link);
+    </script>
+</head>
+<body>
+<div class="reveal">
+    <div class="slides">
+        <section>
+            <h1><img src="img/docker-swarm.png"/></h1>
+            <h2>Docker Swarm</h2>
+        </section>
+        <section>
+            <section>
+                <h2>Docker Swarm (1.12+)</h2>
+                <p>Used for managing a cluster of Docker Engines <span class="fragment highlight-red">natively</span>.
+                </p>
+            </section>
+            <section>
+                <p><strike><a href="https://docs.docker.com/swarm/">https://docs.docker.com/swarm/</a></strike></p>
+                <p>vs</p>
+                <p><a href="https://docs.docker.com/engine/swarm/">https://docs.docker.com/engine/swarm/</a></p>
+            </section>
+        </section>
+        <section>
+            <section>
+                <h1>Features</h1>
+                <ul>
+                    <li class="fragment">Cluster management integrated with Docker Engine</li>
+                    <li class="fragment">Decentralized design</li>
+                    <li class="fragment">Declarative service model</li>
+                    <li class="fragment">Scaling</li>
+                    <li class="fragment">Desired state reconciliation</li>
+                    <li class="fragment">Multi-host networking</li>
+                    <li class="fragment">Service discovery</li>
+                    <li class="fragment">Load balancing</li>
+                    <li class="fragment">Secure by default</li>
+                    <li class="fragment">Rolling updates</li>
+                </ul>
+            </section>
+            <section>
+                <img src="img/demo.png"/>
+                <aside class="notes">
+                    <ul>
+                        <li>use tmux</li>
+                        <li>docker-machine create --driver virtualbox manager-1</li>
+                        <li>docker-machine create --driver virtualbox worker-1</li>
+                        <li>docker-machine create --driver virtualbox worker-2</li>
+                        <li>show virtualbox</li>
+                        <li>docker-machine ls</li>
+                        <li>docker-machine use manager-1</li>
+                        <li>docker swarm init --advertise-addr 192.168.99.100</li>
+                        <li>docker-machine use worker-1 / 2</li>
+                        <li>docker swarm join ...</li>
+                        <li>docker info (on all 3)</li>
+                        <li>docker node ls (show on manager and worker)</li>
+                    </ul>
+                </aside>
+            </section>
+        </section>
+        <section>
+            <section>
+                <img src="img/terminology.gif" />
+                <h1>Terminology</h1>
+            </section>
+            <section>
+                <img src="img/swarm.jpg " />
+                <h2>Swarm</h2>
+                <p>a cluster of Docker Engines where each individual instances is called a...</p>
+            </section>
+            <section>
+                <img src="img/worker-manager.jpg" />
+                <h2>Node</h2>
+                <p>Docker Swarm distinguishes <span class="fragment highlight-red">worker</span> nodes from <span
+                        class="fragment highlight-red">manager</span> nodes.</p>
+                <p class="fragment">By default, manager nodes are also worker nodes.</p>
+            </section>
+            <section>
+                <h2>Services</h2>
+                <p>A single <span class="fragment highlight-red">Docker Engine</span> runs <span
+                        class="fragment highlight-green">containers</span></p>
+                <p>A <span class="fragment highlight-red">Docker Swarm</span> runs <span
+                        class="fragment highlight-green">services</span></p>
+            </section>
+            <section>
+                <h2>Tasks</h2>
+                <p>Atomic scheduling unit of swarm. A manager node assigns tasks to worker nodes.</p>
+                <p class="fragment">e.g. spinning up services, scaling, changing configuration...</p>
+            </section>
+            <section>
+                <img src="img/demo.png"/>
+                <aside class="notes">
+                    <ul>
+                        <li>docker service create --help</li>
+                        <li>docker service create --name mysql -e MYSQL_ROOT_PASSWORD=password -e
+                            MYSQL_DATABASE=database mysql
+                        </li>
+                        <li>docker service ls</li>
+                        <li>docker service ps mysql</li>
+                        <li>docker service inspect --pretty mysql</li>
+                        <li>How to access this?</li>
+                    </ul>
+                </aside>
+            </section>
+        </section>
+        <section>
+            <section>
+                <h1>Ingress routing mesh</h1>
+                <p class="fragment">Enables each node in the swarm to accept connections on published ports for any
+                    service running in the swarm, even if there’s no task running on the node</p>
+            </section>
+            <section>
+                <img src="img/ingress-routing-mesh.png"/>
+            </section>
+            <section>
+                <img src="img/demo.png"/>
+                <aside class="notes">
+                    <ul>
+                        <li>docker service update --help</li>
+                        <li>docker service update --publish-add 3306:3306 mysql</li>
+                        <li>open connection to other node, not hosting mysql</li>
+                        <li>IntelliJ: database, root, password</li>
+                        <li>192.168.99.100/1/2</li>
+                        <li>Use "Test Connection"</li>
+                        <li>Explain swarm chooses where to start task &rarr; data loss &rarr; mounts</li>
+                    </ul>
+                </aside>
+            </section>
+        </section>
+        <section>
+            <section>
+                <h1>Mounts</h1>
+                <ul>
+                    <li class="fragment">bind-mount</li>
+                    <li class="fragment">named volume</li>
+                </ul>
+            </section>
+            <section>
+                <h2>Bind-mount (host &rarr; container)</h2>
+                <ul>
+                    <li class="fragment">Makes a file or directory on the host available to the container it is mounted
+                        within.
+                    </li>
+                    <li class="fragment">e.g. useful for sharing /etc/resolv.conf</li>
+                </ul>
+            </section>
+            <section>
+                <h2>Named Volume (container &rarr; volume)</h2>
+                <ul>
+                    <li class="fragment">Entirely decouples persistent data from container(s)</li>
+                    <li class="fragment">Persists even when no container is currently using it</li>
+                    <li class="fragment">Shareable across multiple containers</li>
+                    <li class="fragment">Backup / Restore using docker commands</li>
+                    <li class="fragment">Uses a volume driver (default: local)</li>
+                    <li class="fragment">Multi-host portabe driver: <a
+                            href="https://flocker-docs.clusterhq.com/en/latest/docker-integration/manual-install.html">flocker</a>
+                    </li>
+                    <li class="fragment">e.g. useful when using databases</li>
+                </ul>
+            </section>
+            <section>
+                <img src="img/demo.png"/>
+                <aside class="notes">
+                    <ul>
+                        <li>docker service update --mount-add type=volume,src=mysql,dst=/var/lib/mysql mysql</li>
+                        <li>(explain later) docker service update --constraint-add 'node.hostname == manager-1' mysql
+                        </li>
+                        <li>docker service inspect --pretty mysql</li>
+                        <li>docker-machine ssh manager-1</li>
+                        <li>sudo -i</li>
+                        <li>cd /var/lib/docker/volumes</li>
+                        <li>Ctrl-D</li>
+                        <li>docker service create --name wordpress -e WORDPRESS_DB_HOST=mysql -e
+                            WORDPRESS_DB_PASSWORD=password -p 8080:80 wordpress
+                        </li>
+                        <li>find docker logs "wordpress"</li>
+                        <li>Cannot find MySQL!</li>
+                    </ul>
+                </aside>
+            </section>
+        </section>
+        <section>
+            <section>
+                <img src="img/network.jpg" />
+                <h1>Overlay networks</h1>
+                <ul>
+                    <li class="fragment">Used to connect one or more services within the swarm.</li>
+                    <li class="fragment">Services within an overlay network are by default accessible via the service
+                        name.
+                    </li>
+                </ul>
+            </section>
+            <section>
+                <img src="img/demo.png"/>
+                <aside class="notes">
+                    <ul>
+                        <li>docker network create --driver overlay wpnet</li>
+                        <li>docker service rm mysql</li>
+                        <li>docker service rm wordpress</li>
+                        <li>docker service create --name mysql --network wpnet --mount
+                            type=volume,src=mysql,dst=/var/lib/mysql --constraint 'node.hostname == manager-1' -e
+                            MYSQL_ROOT_PASSWORD=password -e
+                            MYSQL_DATABASE=database mysql
+                        </li>
+                        <li>docker service create --name wordpress --network wpnet -e WORDPRESS_DB_HOST=mysql -e
+                            WORDPRESS_DB_PASSWORD=password -p 8080:80 wordpress
+                        </li>
+                        <li>find docker logs "wordpress"</li>
+                        <li>No more issues</li>
+                        <li>visit http://192.168.99.100:8080/</li>
+                        <li>visit http://192.168.99.101:8080/</li>
+                        <li>visit http://192.168.99.102:8080/</li>
+                    </ul>
+                </aside>
+            </section>
+        </section>
+        <section>
+            <section>
+                <img src="img/scaling.jpg"/>
+                <h1>Scaling services</h1>
+            </section>
+            <section>
+                <h2>Service mode</h2>
+                <ul>
+                    <li class="fragment">replicated (default): service runs as many times as specified, spread over the
+                        nodes
+                    </li>
+                    <li class="fragment">global: service runs once on each active node</li>
+                </ul>
+            </section>
+            <section>
+                <img src="img/demo.png"/>
+                <aside class="notes">
+                    <ul>
+                        <li>docker service scale wordpress=3</li>
+                    </ul>
+                </aside>
+            </section>
+        </section>
+        <section>
+            <section>
+                <img src="img/constraints.jpg"/>
+                <h1>Constraints</h1>
+            </section>
+            <section>
+                <ul>
+                    <li>node.id == 2ivku8v2gvtg4</li>
+                    <li>node.hostname != node-2</li>
+                    <li>node.role == manager</li>
+                    <li>node.labels.security == high</li>
+                    <li>engine.labels.operatingsystem == ubuntu 14.04</li>
+                </ul>
+            </section>
+            <section>
+                <img src="img/demo.png"/>
+                <aside class="notes">
+                    <ul>
+                        <li>docker service inspect --pretty mysql</li>
+                    </ul>
+                </aside>
+            </section>
+        </section>
+        <section>
+            <section>
+                <img src="img/rolling-update.jpg" />
+                <h1>Rolling updates</h1>
+            </section>
+            <section>
+                <img src="img/update.png"/>
+                <ul>
+                    <li class="fragment">--update-delay</li>
+                    <li class="fragment">--update-parallelism</li>
+                    <li class="fragment">--update-failure-action (pause/continue)</li>
+                </ul>
+            </section>
+            <section>
+                <img src="img/demo.png"/>
+                <aside class="notes">
+                    <ul>
+                        <li>docker service inspect --pretty wordpress</li>
+                        <li>docker service update --update-delay 10s wordpress</li>
+                        <li>docker service inspect --pretty wordpress</li>
+                        <li>docker service update --image wordpress:4.5 wordpress</li>
+                    </ul>
+                </aside>
+            </section>
+        </section>
+        <section>
+            <section>
+                <img src="img/reconciliation.jpg" />
+                <h2>Desired state reconciliation</h2>
+                <p>The swarm manager node constantly monitors the cluster state and reconciles any differences between
+                    the actual state and your expressed desired state.</p>
+            </section>
+            <section>
+                <img src="img/demo.png"/>
+                <aside class="notes">
+                    <ul>
+                        <li>docker-machine stop (machine running wordpress)</li>
+                    </ul>
+                </aside>
+            </section>
+        </section>
+        <section>
+            <section>
+                <img src="img/scheduler.jpg" />
+                <h1>Scheduling</h1>
+                <p>Main job of scheduler is to decide which node to use when running container</p>
+            </section>
+            <section>
+                <h2>Scheduling Criteria</h2>
+                <ul>
+                    <li class="fragment">Resource availability (CPU, RAM, nr. of containers)</li>
+                    <li class="fragment">Labels and Constraints</li>
+                </ul>
+            </section>
+            <section>
+                <h2>Strategy</h2>
+                <ul>
+                    <li class="fragment">Spread strategy: tasks are scheduled on least loaded node, provided they meet
+                        the constraints and resource requirements
+                    </li>
+                </ul>
+            </section>
+            <section>
+                <img src="img/unsupported.jpg" />
+                <h2>Unsupported (&harr; swarm standalone)</h2>
+                <ul>
+                    <li class="fragment">binpack (maximize load, minimize nr. of machines used)</li>
+                    <li class="fragment">random</li>
+                    <li class="fragment">affinity / anti-affinity</li>
+                </ul>
+            </section>
+        </section>
+        <section>
+            <img src="img/docker_composer.png" />
+            <h3>Docker stacks and distributed application bundles</h3>
+            <ul>
+                <li class="highlight-red fragment">Experimental</li>
+                <li class="fragment">docker-compose.yml &rarr; Distributed Application Bundle &rarr; Stack</li>
+                <li class="fragment">Some configuration options are not yet supported in the DAB format, including
+                    volume mounts.
+                </li>
+                <li class="fragment"><a href="https://docs.docker.com/compose/bundles/">https://docs.docker.com/compose/bundles/</a>
+                </li>
+            </ul>
+        </section>
+        <section>
+            <h1>Within TomTom: Flux</h1>
+            <img src="img/demo.png"/>
+            <aside class="notes">
+                <ul>
+                    <li><a href="https://fs-eu.tomtomgroup.com/adfs/ls/IdpInitiatedSignOn.aspx">AWS</a></li>
+                    <li>Created using docker-machine</li>
+                    <li>docker-machine use flux-cd-manager-1</li>
+                    <li>docker service ls</li>
+                    <li><a href="http://jenkins.tomtomgroup.com/view/Workflow/job/Flux/job/Flux%20CD/889/">http://jenkins.tomtomgroup.com/view/Workflow/job/Flux/job/Flux%20CD/889/</a>
+                    </li>
+                    <li><a href="http://registry.maps.tomtom.com:5000/v2/_catalog">http://registry.maps.tomtom.com:5000/v2/_catalog</a>
+                    </li>
+                    <li><a href="https://bitbucket.tomtomgroup.com/projects/WORKFLOW/repos/yellow-deployment/browse">https://bitbucket.tomtomgroup.com/projects/WORKFLOW/repos/yellow-deployment/browse</a>
+                    </li>
+                </ul>
+            </aside>
+        </section>
+        <section>
+            <img src="img/questions.jpg" />
+            <h1>Questions?</h1>
+        </section>
+        <section data-background="http://i.giphy.com/l2R0eYcNq9rJUsVAA.gif">
+            <h1>Thank you!</h1>
+        </section>
+    </div>
+</div>
+
+<script src="lib/js/head.min.js"></script>
+<script src="js/reveal.js"></script>
+
+<script>
+    // More info https://github.com/hakimel/reveal.js#configuration
+    Reveal.initialize({
+        history: true,
+
+        // More info https://github.com/hakimel/reveal.js#dependencies
+        dependencies: [
+            {src: 'plugin/markdown/marked.js'},
+            {src: 'plugin/markdown/markdown.js'},
+            {src: 'plugin/notes/notes.js', async: true},
+            {
+                src: 'plugin/highlight/highlight.js', async: true, callback: function () {
+                hljs.initHighlightingOnLoad();
+            }
+            }
+        ]
+    });
+</script>
+</body>
+</html>
