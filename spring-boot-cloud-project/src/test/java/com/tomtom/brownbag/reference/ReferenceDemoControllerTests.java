@@ -28,7 +28,7 @@ public class ReferenceDemoControllerTests {
 
 	@Test // (expected = RuntimeException.class)
 	public void demoController() {
-//		doThrow(new RuntimeException("Other behavior")).when(demoController).key();
+//		doThrow(new RuntimeException("Pause time and run away.")).when(demoController).key();
 
         String result = template.getForObject("http://localhost:" + port + "/key", String.class);
 
